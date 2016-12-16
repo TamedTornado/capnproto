@@ -36,3 +36,8 @@
 
 # cabal-install artifacts
 /compiler/dist/
+c++/vs2015/
+c++/vs2015-win64/
+c++/vs2015-ps4/
+c++/vs2015-win32/
+c++/vs2015-xboxone/
