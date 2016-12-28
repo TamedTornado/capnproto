@@ -43,7 +43,7 @@ public:
   ~Thread() noexcept(false);
 
 #if !_WIN32
-  void sendSignal(int signo);
+//  void sendSignal(int signo);
   // Send a Unix signal to the given thread, using pthread_kill or an equivalent.
 #endif
 

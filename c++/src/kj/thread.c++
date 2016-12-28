@@ -26,7 +26,7 @@
 #include <windows.h>
 #else
 #include <pthread.h>
-#include <signal.h>
+//#include <signal.h>
 #endif
 
 namespace kj {
@@ -89,12 +89,12 @@ Thread::~Thread() noexcept(false) {
   }
 }
 
-void Thread::sendSignal(int signo) {
-  int pthreadResult = pthread_kill(*reinterpret_cast<pthread_t*>(&threadId), signo);
-  if (pthreadResult != 0) {
-    KJ_FAIL_SYSCALL("pthread_kill", pthreadResult) { break; }
-  }
-}
+// void Thread::sendSignal(int signo) {
+//   int pthreadResult = pthread_kill(*reinterpret_cast<pthread_t*>(&threadId), signo);
+//   if (pthreadResult != 0) {
+//     KJ_FAIL_SYSCALL("pthread_kill", pthreadResult) { break; }
+//   }
+// }
 
 void Thread::detach() {
   int pthreadResult = pthread_detach(*reinterpret_cast<pthread_t*>(&threadId));

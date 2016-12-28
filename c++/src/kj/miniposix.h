@@ -91,7 +91,7 @@ inline int mkdir(const char* path, int mode) {
 #else
 // We're on real POSIX.
 
-using ::pipe;
+//using ::pipe;
 using ::mkdir;
 
 #endif
