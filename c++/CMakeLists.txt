@@ -60,7 +60,26 @@ else()
   set(CAPNP_LITE_FLAG)
 endif()
 
+
 if(MSVC)
+	OPTION(STATIC_WINCRT "Use static WinCRT" OFF)
+
+	IF(STATIC_WINCRT)
+		SET(TARGET_CRT_SUFFIX "-mt")
+		SET(WINCRT_NDEBUG "/MT")
+		SET(WINCRT_DEBUG "/MTd")
+	ELSE()
+		SET(TARGET_CRT_SUFFIX "-md")
+		SET(WINCRT_NDEBUG "/MD")
+		SET(WINCRT_DEBUG "/MDd")
+	ENDIF()
+
+	SET(CMAKE_CXX_FLAGS_DEBUG "/Od /RTCsu ${WINCRT_DEBUG}")
+	SET(CMAKE_CXX_FLAGS_CHECKED "/Ox ${WINCRT_NDEBUG}")
+	SET(CMAKE_CXX_FLAGS_PROFILE "/Ox ${WINCRT_NDEBUG}")
+	SET(CMAKE_CXX_FLAGS_RELEASE "/Ox ${WINCRT_NDEBUG}")
+
+
   # TODO(cleanup): Enable higher warning level in MSVC, but make sure to test
   #   build with that warning level and clean out false positives.
   set(CMAKE_CXX_FLAGS "${CAPNP_LITE_FLAG} ${CMAKE_CXX_FLAGS}")
@@ -81,9 +100,31 @@ else()
   set(CMAKE_CXX_FLAGS "-std=gnu++0x -Wall -Wextra -Wno-strict-aliasing -Wno-sign-compare -Wno-unused-parameter -pthread ${CAPNP_LITE_FLAG} ${CMAKE_CXX_FLAGS}")
 endif()
 
+
 # Source =======================================================================
 
 add_subdirectory(src)
+
+SET(LIB_DIR ${CMAKE_BINARY_DIR}/lib)
+
+# Override the default output directories for all configurations.
+SET(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_DEBUG ${LIB_DIR})
+SET(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE ${LIB_DIR})
+
+SET(CMAKE_COMPILE_PDB_OUTPUT_DIRECTORY ${LIB_DIR})
+
+set_target_properties(kj 
+	PROPERTIES 
+	OUTPUT_NAME kj${TARGET_CRT_SUFFIX}
+	COMPILE_PDB_NAME kj${TARGET_CRT_SUFFIX}
+)
+
+set_target_properties(capnp
+	PROPERTIES 
+	OUTPUT_NAME capnp${TARGET_CRT_SUFFIX}
+	COMPILE_PDB_NAME capnp${TARGET_CRT_SUFFIX}
+)
+
 
 # Install ======================================================================
 
