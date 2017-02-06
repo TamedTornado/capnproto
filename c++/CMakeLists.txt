@@ -1,23 +1,8 @@
 project("Cap'n Proto" CXX)
 cmake_minimum_required(VERSION 2.8)
 
-if(TARGET_BUILD_PLATFORM STREQUAL XboxOne)
-  set(MSVC 1)
-  set(CMAKE_SUPPRESS_REGENERATION TRUE)
-  
-  message("looking for $ENV{CMAKE_MODULE_PATH}\\Microsoft.Cpp.Durango.user.props")
-  
-  find_file(DURANGO_PROPS 
-	NAMES Microsoft.Cpp.Durango.user.props
-	PATHS $ENV{CMAKE_MODULE_PATH}
-	PATH_SUFFIXES xboxone)
-
-  if(DURANGO_PROPS STREQUAL DURANGO_PROPS-NOTFOUND)
-    message(FATAL_ERROR "$ENV{CMAKE_MODULE_PATH}\\Microsoft.Cpp.Durango.user.props not found")
-  endif()
-  
-  message("Found: " ${DURANGO_PROPS})
-else()
+#Skip this check if we're building XBone
+if(NOT TARGET_BUILD_PLATFORM STREQUAL XboxOne)
   include(CheckIncludeFileCXX)
   if(MSVC)
     check_include_file_cxx(initializer_list HAS_CXX11)
@@ -90,34 +75,55 @@ if(MSVC)
 		SET(WINCRT_DEBUG "/MDd")
 	ENDIF()
 	
-	IF(TARGET_BUILD_PLATFORM STREQUAL XboxOne)
-	    SET(TARGET_CRT_SUFFIX "")
-	ENDIF()
-
 	SET(CMAKE_CXX_FLAGS_DEBUG "/Od /RTCsu ${WINCRT_DEBUG}")
 	SET(CMAKE_CXX_FLAGS_CHECKED "/Ox ${WINCRT_NDEBUG}")
 	SET(CMAKE_CXX_FLAGS_PROFILE "/Ox ${WINCRT_NDEBUG}")
 	SET(CMAKE_CXX_FLAGS_RELEASE "/Ox ${WINCRT_NDEBUG}")
 
 
-  # TODO(cleanup): Enable higher warning level in MSVC, but make sure to test
-  #   build with that warning level and clean out false positives.
-  set(CMAKE_CXX_FLAGS "${CAPNP_LITE_FLAG} ${CMAKE_CXX_FLAGS}")
+	# TODO(cleanup): Enable higher warning level in MSVC, but make sure to test
+	#   build with that warning level and clean out false positives.
+	set(CMAKE_CXX_FLAGS "${CAPNP_LITE_FLAG} ${CMAKE_CXX_FLAGS}")
+elseif(TARGET_BUILD_PLATFORM STREQUAL XboxOne)
+
+	set(CMAKE_SUPPRESS_REGENERATION TRUE)
+
+	message("looking for $ENV{CMAKE_MODULE_PATH}\\Microsoft.Cpp.Durango.user.props")
+
+	find_file(DURANGO_PROPS 
+	NAMES Microsoft.Cpp.Durango.user.props
+	PATHS $ENV{CMAKE_MODULE_PATH}
+	PATH_SUFFIXES xboxone)
+
+	if(DURANGO_PROPS STREQUAL DURANGO_PROPS-NOTFOUND)
+	message(FATAL_ERROR "$ENV{CMAKE_MODULE_PATH}\\Microsoft.Cpp.Durango.user.props not found")
+	endif()
+
+	message("Found: " ${DURANGO_PROPS})
+
+	SET(CMAKE_CXX_FLAGS_DEBUG "/Od /RTCsu")
+	SET(CMAKE_CXX_FLAGS_CHECKED "/Ox")
+	SET(CMAKE_CXX_FLAGS_PROFILE "/Ox")
+	SET(CMAKE_CXX_FLAGS_RELEASE "/Ox")
+
+	set(CMAKE_CXX_FLAGS "/EHsc ${CAPNP_LITE_FLAG} ${CMAKE_CXX_FLAGS}")
+
 else()
-  # Note that it's important to add new CXXFLAGS before ones specified by the
-  # user, so that the user's flags override them. This is particularly
-  # important if -Werror was enabled and then certain warnings need to be
-  # disabled, as is done in super-test.sh.
-  #
-  # We enable a lot of warnings, but then disable some:
-  # * strict-aliasing: We use type-punning in known-safe ways that GCC doesn't
-  #   recognize as safe.
-  # * sign-compare: Low S/N ratio.
-  # * unused-parameter: Low S/N ratio.
-  #
-  # We have to use -std=gnu++0x isntead of -std=c++11 because otherwise we lose
-  # GNU extensions that we need.
-  set(CMAKE_CXX_FLAGS "-std=gnu++0x -Wall -Wextra -Wno-strict-aliasing -Wno-sign-compare -Wno-unused-parameter -pthread ${CAPNP_LITE_FLAG} ${CMAKE_CXX_FLAGS}")
+
+	# Note that it's important to add new CXXFLAGS before ones specified by the
+	# user, so that the user's flags override them. This is particularly
+	# important if -Werror was enabled and then certain warnings need to be
+	# disabled, as is done in super-test.sh.
+	#
+	# We enable a lot of warnings, but then disable some:
+	# * strict-aliasing: We use type-punning in known-safe ways that GCC doesn't
+	#   recognize as safe.
+	# * sign-compare: Low S/N ratio.
+	# * unused-parameter: Low S/N ratio.
+	#
+	# We have to use -std=gnu++0x isntead of -std=c++11 because otherwise we lose
+	# GNU extensions that we need.
+	set(CMAKE_CXX_FLAGS "-std=gnu++0x -Wall -Wextra -Wno-strict-aliasing -Wno-sign-compare -Wno-unused-parameter -pthread ${CAPNP_LITE_FLAG} ${CMAKE_CXX_FLAGS}")
 endif()
 
 
