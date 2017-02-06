@@ -81,12 +81,12 @@ using ::close;
 #if _WIN32
 // We're on Windows, including MinGW. pipe() and mkdir() are non-standard even on MinGW.
 
-inline int pipe(int fds[2]) {
-  return ::_pipe(fds, 4096, false);
-}
-inline int mkdir(const char* path, int mode) {
-  return ::_mkdir(path);
-}
+//inline int pipe(int fds[2]) {
+//  return ::_pipe(fds, 4096, false);
+//}
+//inline int mkdir(const char* path, int mode) {
+//  return ::_mkdir(path);
+//}
 
 #else
 // We're on real POSIX.

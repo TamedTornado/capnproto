@@ -83,6 +83,10 @@ if(NOT CAPNP_LITE)
   install(FILES ${kj-async_headers} DESTINATION "${INCLUDE_INSTALL_DIR}/kj")
 endif()
 
+if(TARGET_BUILD_PLATFORM STREQUAL XboxOne)
+  configure_file("${DURANGO_PROPS}" "kj.vcxproj.user" COPYONLY)
+endif()
+
 # Tests ========================================================================
 
 if(BUILD_TESTING)

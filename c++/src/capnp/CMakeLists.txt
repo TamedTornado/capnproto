@@ -135,6 +135,10 @@ if(BUILD_TOOLS AND NOT CAPNP_LITE)
   install(CODE "execute_process(COMMAND \"${CMAKE_COMMAND}\" -E create_symlink capnp \"${BIN_INSTALL_DIR}/capnpc\")")
 endif()  # BUILD_TOOLS AND NOT CAPNP_LITE
 
+if(TARGET_BUILD_PLATFORM STREQUAL XboxOne)
+  configure_file("${DURANGO_PROPS}" "capnp.vcxproj.user" COPYONLY)
+endif()
+
 # Tests ========================================================================
 
 if(BUILD_TESTING)

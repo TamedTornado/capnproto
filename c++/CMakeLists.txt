@@ -1,16 +1,32 @@
 project("Cap'n Proto" CXX)
 cmake_minimum_required(VERSION 2.8)
 
-set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+if(TARGET_BUILD_PLATFORM STREQUAL XboxOne)
+  set(MSVC 1)
+  set(CMAKE_SUPPRESS_REGENERATION TRUE)
+  
+  message("looking for $ENV{CMAKE_MODULE_PATH}\\Microsoft.Cpp.Durango.user.props")
+  
+  find_file(DURANGO_PROPS 
+	NAMES Microsoft.Cpp.Durango.user.props
+	PATHS $ENV{CMAKE_MODULE_PATH}
+	PATH_SUFFIXES xboxone)
 
-include(CheckIncludeFileCXX)
-if(MSVC)
-  check_include_file_cxx(initializer_list HAS_CXX11)
+  if(DURANGO_PROPS STREQUAL DURANGO_PROPS-NOTFOUND)
+    message(FATAL_ERROR "$ENV{CMAKE_MODULE_PATH}\\Microsoft.Cpp.Durango.user.props not found")
+  endif()
+  
+  message("Found: " ${DURANGO_PROPS})
 else()
-  check_include_file_cxx(initializer_list HAS_CXX11 "-std=gnu++0x")
-endif()
-if(NOT HAS_CXX11)
-  message(SEND_ERROR "Requires a C++11 compiler and standard library.")
+  include(CheckIncludeFileCXX)
+  if(MSVC)
+    check_include_file_cxx(initializer_list HAS_CXX11)
+  else()
+    check_include_file_cxx(initializer_list HAS_CXX11 "-std=gnu++0x")
+  endif()
+  if(NOT HAS_CXX11)
+    message(WARNING "Requires a C++11 compiler and standard library.")
+  endif()
 endif()
 
 # Set installation paths; these can be overridden in the cache.
@@ -72,6 +88,10 @@ if(MSVC)
 		SET(TARGET_CRT_SUFFIX "-md")
 		SET(WINCRT_NDEBUG "/MD")
 		SET(WINCRT_DEBUG "/MDd")
+	ENDIF()
+	
+	IF(TARGET_BUILD_PLATFORM STREQUAL XboxOne)
+	    SET(TARGET_CRT_SUFFIX "")
 	ENDIF()
 
 	SET(CMAKE_CXX_FLAGS_DEBUG "/Od /RTCsu ${WINCRT_DEBUG}")
